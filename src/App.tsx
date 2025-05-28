@@ -8,7 +8,12 @@ import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import Index from "./pages/Index";
 import Shop from "./pages/Shop";
+import Category from "./pages/Category";
+import ProductDetail from "./pages/ProductDetail";
 import Cart from "./pages/Cart";
+import Checkout from "./pages/Checkout";
+import OrderSuccess from "./pages/OrderSuccess";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,11 +36,56 @@ const App = () => (
                 <Footer />
               </>
             } />
+            <Route path="/category/:name" element={
+              <>
+                <Navbar />
+                <main className="flex-1">
+                  <Category />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/product/:id" element={
+              <>
+                <Navbar />
+                <main className="flex-1">
+                  <ProductDetail />
+                </main>
+                <Footer />
+              </>
+            } />
             <Route path="/cart" element={
               <>
                 <Navbar />
                 <main className="flex-1">
                   <Cart />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/checkout" element={
+              <>
+                <Navbar />
+                <main className="flex-1">
+                  <Checkout />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/order-success" element={
+              <>
+                <Navbar />
+                <main className="flex-1">
+                  <OrderSuccess />
+                </main>
+                <Footer />
+              </>
+            } />
+            <Route path="/my-orders" element={
+              <>
+                <Navbar />
+                <main className="flex-1">
+                  <MyOrders />
                 </main>
                 <Footer />
               </>
