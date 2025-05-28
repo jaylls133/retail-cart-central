@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Filter, Grid, List, ChevronDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -12,8 +11,14 @@ import { Badge } from "@/components/ui/badge";
 const Shop = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   const [showFilters, setShowFilters] = useState(false);
+  const [sortBy, setSortBy] = useState('featured');
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<string[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [showInStock, setShowInStock] = useState(false);
+  const [showOnSale, setShowOnSale] = useState(false);
 
-  const products = [
+  const allProducts = [
     {
       id: "1",
       title: "Wireless Bluetooth Headphones - Premium Quality Sound",
@@ -23,7 +28,8 @@ const Shop = () => {
       rating: 4.5,
       reviews: 124,
       inStock: true,
-      isSale: true
+      isSale: true,
+      category: "Electronics"
     },
     {
       id: "2",
@@ -33,7 +39,8 @@ const Shop = () => {
       rating: 4.8,
       reviews: 89,
       inStock: true,
-      isNew: true
+      isNew: true,
+      category: "Electronics"
     },
     {
       id: "3",
@@ -44,7 +51,8 @@ const Shop = () => {
       rating: 4.3,
       reviews: 67,
       inStock: true,
-      isSale: true
+      isSale: true,
+      category: "Home & Garden"
     },
     {
       id: "4",
@@ -53,7 +61,8 @@ const Shop = () => {
       image: "https://images.unsplash.com/photo-1511499767150-a48a237f0083?w=400",
       rating: 4.6,
       reviews: 156,
-      inStock: true
+      inStock: true,
+      category: "Clothing"
     },
     {
       id: "5",
@@ -64,7 +73,8 @@ const Shop = () => {
       rating: 4.4,
       reviews: 203,
       inStock: true,
-      isSale: true
+      isSale: true,
+      category: "Clothing"
     },
     {
       id: "6",
@@ -73,7 +83,8 @@ const Shop = () => {
       image: "https://images.unsplash.com/photo-1609091839311-d5365f9ff1c5?w=400",
       rating: 4.2,
       reviews: 98,
-      inStock: true
+      inStock: true,
+      category: "Electronics"
     },
     {
       id: "7",
@@ -84,7 +95,8 @@ const Shop = () => {
       rating: 4.7,
       reviews: 145,
       inStock: false,
-      isSale: true
+      isSale: true,
+      category: "Electronics"
     },
     {
       id: "8",
@@ -94,7 +106,8 @@ const Shop = () => {
       rating: 4.5,
       reviews: 176,
       inStock: true,
-      isNew: true
+      isNew: true,
+      category: "Electronics"
     }
   ];
 
@@ -117,6 +130,85 @@ const Shop = () => {
     "Over $200"
   ];
 
+  // Filter products based on selected filters
+  const filteredProducts = allProducts.filter(product => {
+    // Search filter
+    if (searchTerm && !product.title.toLowerCase().includes(searchTerm.toLowerCase())) {
+      return false;
+    }
+
+    // Category filter
+    if (selectedCategories.length > 0 && !selectedCategories.includes(product.category)) {
+      return false;
+    }
+
+    // Price range filter
+    if (selectedPriceRanges.length > 0) {
+      const matchesPriceRange = selectedPriceRanges.some(range => {
+        switch (range) {
+          case "Under $25":
+            return product.price < 25;
+          case "$25 - $50":
+            return product.price >= 25 && product.price <= 50;
+          case "$50 - $100":
+            return product.price >= 50 && product.price <= 100;
+          case "$100 - $200":
+            return product.price >= 100 && product.price <= 200;
+          case "Over $200":
+            return product.price > 200;
+          default:
+            return true;
+        }
+      });
+      if (!matchesPriceRange) return false;
+    }
+
+    // Stock filter
+    if (showInStock && !product.inStock) {
+      return false;
+    }
+
+    // Sale filter
+    if (showOnSale && !product.isSale) {
+      return false;
+    }
+
+    return true;
+  });
+
+  // Sort products based on selected sort option
+  const sortedProducts = [...filteredProducts].sort((a, b) => {
+    switch (sortBy) {
+      case 'price-low':
+        return a.price - b.price;
+      case 'price-high':
+        return b.price - a.price;
+      case 'rating':
+        return b.rating - a.rating;
+      case 'newest':
+        return (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0);
+      case 'featured':
+      default:
+        return 0; // Keep original order for featured
+    }
+  });
+
+  const handleCategoryChange = (category: string, checked: boolean) => {
+    if (checked) {
+      setSelectedCategories([...selectedCategories, category]);
+    } else {
+      setSelectedCategories(selectedCategories.filter(c => c !== category));
+    }
+  };
+
+  const handlePriceRangeChange = (range: string, checked: boolean) => {
+    if (checked) {
+      setSelectedPriceRanges([...selectedPriceRanges, range]);
+    } else {
+      setSelectedPriceRanges(selectedPriceRanges.filter(r => r !== range));
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -133,11 +225,13 @@ const Shop = () => {
               <Input 
                 placeholder="Search products..." 
                 className="border-gray-200"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             
             <div className="flex items-center gap-4">
-              <Select>
+              <Select value={sortBy} onValueChange={setSortBy}>
                 <SelectTrigger className="w-48">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -194,7 +288,11 @@ const Shop = () => {
                 <CardContent className="space-y-3">
                   {categories.map((category) => (
                     <div key={category} className="flex items-center space-x-2">
-                      <Checkbox id={category} />
+                      <Checkbox 
+                        id={category}
+                        checked={selectedCategories.includes(category)}
+                        onCheckedChange={(checked) => handleCategoryChange(category, checked as boolean)}
+                      />
                       <label htmlFor={category} className="text-sm text-gray-700 cursor-pointer">
                         {category}
                       </label>
@@ -211,7 +309,11 @@ const Shop = () => {
                 <CardContent className="space-y-3">
                   {priceRanges.map((range) => (
                     <div key={range} className="flex items-center space-x-2">
-                      <Checkbox id={range} />
+                      <Checkbox 
+                        id={range}
+                        checked={selectedPriceRanges.includes(range)}
+                        onCheckedChange={(checked) => handlePriceRangeChange(range, checked as boolean)}
+                      />
                       <label htmlFor={range} className="text-sm text-gray-700 cursor-pointer">
                         {range}
                       </label>
@@ -227,13 +329,21 @@ const Shop = () => {
                 </CardHeader>
                 <CardContent className="space-y-3">
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="in-stock" />
+                    <Checkbox 
+                      id="in-stock"
+                      checked={showInStock}
+                      onCheckedChange={(checked) => setShowInStock(checked as boolean)}
+                    />
                     <label htmlFor="in-stock" className="text-sm text-gray-700 cursor-pointer">
                       In Stock
                     </label>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="on-sale" />
+                    <Checkbox 
+                      id="on-sale"
+                      checked={showOnSale}
+                      onCheckedChange={(checked) => setShowOnSale(checked as boolean)}
+                    />
                     <label htmlFor="on-sale" className="text-sm text-gray-700 cursor-pointer">
                       On Sale
                     </label>
@@ -248,7 +358,7 @@ const Shop = () => {
             {/* Results count */}
             <div className="flex items-center justify-between mb-6">
               <div className="flex items-center gap-2">
-                <span className="text-gray-600">Showing {products.length} results</span>
+                <span className="text-gray-600">Showing {sortedProducts.length} results</span>
                 <Badge variant="secondary">New arrivals available</Badge>
               </div>
             </div>
@@ -259,17 +369,38 @@ const Shop = () => {
                 ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
                 : 'grid-cols-1'
             }`}>
-              {products.map((product) => (
+              {sortedProducts.map((product) => (
                 <ProductCard key={product.id} {...product} />
               ))}
             </div>
 
+            {sortedProducts.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-gray-500 text-lg">No products found matching your criteria.</p>
+                <Button 
+                  variant="outline" 
+                  className="mt-4"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategories([]);
+                    setSelectedPriceRanges([]);
+                    setShowInStock(false);
+                    setShowOnSale(false);
+                  }}
+                >
+                  Clear all filters
+                </Button>
+              </div>
+            )}
+
             {/* Load More */}
-            <div className="text-center mt-12">
-              <Button size="lg" variant="outline" className="px-8">
-                Load More Products
-              </Button>
-            </div>
+            {sortedProducts.length > 0 && (
+              <div className="text-center mt-12">
+                <Button size="lg" variant="outline" className="px-8">
+                  Load More Products
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
