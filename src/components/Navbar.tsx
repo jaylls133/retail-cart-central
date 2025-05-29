@@ -1,19 +1,27 @@
 
-import { ShoppingCart, Search, Menu, User, Heart } from "lucide-react";
+import { ShoppingCart, Search, Menu, User, Heart, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const { getTotalItems } = useCart();
+  const { user, logout, isAuthenticated, isAdmin } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/");
+  };
 
   const categories = [
     "Electronics",
-    "Clothing",
+    "Clothing", 
     "Home & Garden",
     "Sports",
     "Beauty",
@@ -53,24 +61,57 @@ const Navbar = () => {
 
           {/* Right side actions */}
           <div className="flex items-center space-x-4">
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <User className="h-4 w-4 mr-2" />
-              Account
-            </Button>
-            
-            <Button variant="ghost" size="sm" className="hidden md:flex">
-              <Heart className="h-4 w-4" />
-            </Button>
+            {isAuthenticated ? (
+              <>
+                <div className="hidden md:flex items-center space-x-2">
+                  <span className="text-sm text-gray-600">
+                    Welcome, {user?.name || user?.email}
+                    {isAdmin && <span className="ml-1 text-purple-600">(Admin)</span>}
+                  </span>
+                </div>
+                
+                <Button variant="ghost" size="sm" className="hidden md:flex">
+                  <Heart className="h-4 w-4" />
+                </Button>
+
+                {isAdmin && (
+                  <Link to="/admin">
+                    <Button variant="ghost" size="sm" className="hidden md:flex text-purple-600 hover:text-purple-700">
+                      Admin
+                    </Button>
+                  </Link>
+                )}
+
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="hidden md:flex text-red-600 hover:text-red-700"
+                  onClick={handleLogout}
+                >
+                  <LogOut className="h-4 w-4 mr-1" />
+                  Logout
+                </Button>
+              </>
+            ) : (
+              <>
+                <Link to="/login">
+                  <Button variant="ghost" size="sm" className="hidden md:flex">
+                    <User className="h-4 w-4 mr-2" />
+                    Login
+                  </Button>
+                </Link>
+                
+                <Link to="/register">
+                  <Button size="sm" className="hidden md:flex">
+                    Sign Up
+                  </Button>
+                </Link>
+              </>
+            )}
 
             <Link to="/bulk-order">
               <Button variant="ghost" size="sm" className="hidden md:flex text-green-600 hover:text-green-700">
                 Bulk Order
-              </Button>
-            </Link>
-
-            <Link to="/admin">
-              <Button variant="ghost" size="sm" className="hidden md:flex text-purple-600 hover:text-purple-700">
-                Admin
               </Button>
             </Link>
 
@@ -96,7 +137,7 @@ const Navbar = () => {
           </div>
         </div>
 
-        {/* Categories - hidden on mobile unless menu is open */}
+        {/* Categories and mobile menu */}
         <div className={`border-t ${isMenuOpen ? 'block' : 'hidden'} md:block`}>
           <div className="flex flex-col md:flex-row md:items-center md:space-x-8 py-4">
             {categories.map((category) => (
@@ -108,17 +149,44 @@ const Navbar = () => {
                 {category}
               </Link>
             ))}
+            
+            {/* Mobile auth buttons */}
+            <div className="md:hidden space-y-2 mt-4 pt-4 border-t">
+              {isAuthenticated ? (
+                <>
+                  <div className="text-sm text-gray-600 py-2">
+                    Welcome, {user?.name || user?.email}
+                    {isAdmin && <span className="ml-1 text-purple-600">(Admin)</span>}
+                  </div>
+                  {isAdmin && (
+                    <Link to="/admin" className="block py-2 text-purple-600 hover:text-purple-700 text-sm font-medium">
+                      Admin Dashboard
+                    </Link>
+                  )}
+                  <button 
+                    onClick={handleLogout}
+                    className="block py-2 text-red-600 hover:text-red-700 text-sm font-medium"
+                  >
+                    Logout
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/login" className="block py-2 text-gray-600 hover:text-blue-600 text-sm font-medium">
+                    Login
+                  </Link>
+                  <Link to="/register" className="block py-2 text-blue-600 hover:text-blue-700 text-sm font-medium">
+                    Sign Up
+                  </Link>
+                </>
+              )}
+            </div>
+            
             <Link
               to="/bulk-order"
               className="text-green-600 hover:text-green-700 transition-colors py-2 md:py-0 text-sm font-medium md:hidden"
             >
               Bulk Order
-            </Link>
-            <Link
-              to="/admin"
-              className="text-purple-600 hover:text-purple-700 transition-colors py-2 md:py-0 text-sm font-medium md:hidden"
-            >
-              Admin
             </Link>
           </div>
         </div>
