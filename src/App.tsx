@@ -2,8 +2,8 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from "@/components/ui/toaster";
 import { CartProvider } from '@/contexts/CartContext';
-import { Navbar } from './components/Navbar';
-import { Footer } from './components/Footer';
+import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import Index from './pages/Index';
 import Home from './pages/Home';
 import Shop from './pages/Shop';
