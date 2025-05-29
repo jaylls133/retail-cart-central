@@ -13,6 +13,7 @@ import Cart from './pages/Cart';
 import Checkout from './pages/Checkout';
 import OrderSuccess from './pages/OrderSuccess';
 import MyOrders from './pages/MyOrders';
+import BulkOrder from './pages/BulkOrder';
 import NotFound from './pages/NotFound';
 import './App.css';
 
@@ -33,6 +34,7 @@ function App() {
               <Route path="/checkout" element={<Checkout />} />
               <Route path="/order-success" element={<OrderSuccess />} />
               <Route path="/my-orders" element={<MyOrders />} />
+              <Route path="/bulk-order" element={<BulkOrder />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>

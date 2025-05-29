@@ -1,3 +1,4 @@
+
 import { ShoppingCart, Search, Menu, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -60,6 +61,12 @@ const Navbar = () => {
               <Heart className="h-4 w-4" />
             </Button>
 
+            <Link to="/bulk-order">
+              <Button variant="ghost" size="sm" className="hidden md:flex text-green-600 hover:text-green-700">
+                Bulk Order
+              </Button>
+            </Link>
+
             <Link to="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4" />
@@ -94,6 +101,12 @@ const Navbar = () => {
                 {category}
               </Link>
             ))}
+            <Link
+              to="/bulk-order"
+              className="text-green-600 hover:text-green-700 transition-colors py-2 md:py-0 text-sm font-medium md:hidden"
+            >
+              Bulk Order
+            </Link>
           </div>
         </div>
 
