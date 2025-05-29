@@ -5,9 +5,10 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 
 const Navbar = () => {
-  const [cartItems] = useState(3);
+  const { getTotalItems } = useCart();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
   const categories = [
@@ -67,12 +68,18 @@ const Navbar = () => {
               </Button>
             </Link>
 
+            <Link to="/admin">
+              <Button variant="ghost" size="sm" className="hidden md:flex text-purple-600 hover:text-purple-700">
+                Admin
+              </Button>
+            </Link>
+
             <Link to="/cart">
               <Button variant="ghost" size="sm" className="relative">
                 <ShoppingCart className="h-4 w-4" />
-                {cartItems > 0 && (
+                {getTotalItems() > 0 && (
                   <Badge className="absolute -top-2 -right-2 h-5 w-5 rounded-full p-0 flex items-center justify-center bg-red-500 text-xs">
-                    {cartItems}
+                    {getTotalItems()}
                   </Badge>
                 )}
               </Button>
@@ -106,6 +113,12 @@ const Navbar = () => {
               className="text-green-600 hover:text-green-700 transition-colors py-2 md:py-0 text-sm font-medium md:hidden"
             >
               Bulk Order
+            </Link>
+            <Link
+              to="/admin"
+              className="text-purple-600 hover:text-purple-700 transition-colors py-2 md:py-0 text-sm font-medium md:hidden"
+            >
+              Admin
             </Link>
           </div>
         </div>

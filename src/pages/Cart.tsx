@@ -1,64 +1,20 @@
 
-import { useState } from "react";
 import { Minus, Plus, Trash2, ShoppingCart, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 
 const Cart = () => {
-  const [cartItems, setCartItems] = useState([
-    {
-      id: "1",
-      title: "Wireless Bluetooth Headphones",
-      price: 99.99,
-      originalPrice: 149.99,
-      image: "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=400",
-      quantity: 2,
-      inStock: true
-    },
-    {
-      id: "2",
-      title: "Smart Watch Series 5",
-      price: 249.99,
-      image: "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400",
-      quantity: 1,
-      inStock: true
-    },
-    {
-      id: "3",
-      title: "Premium Coffee Maker",
-      price: 179.99,
-      originalPrice: 219.99,
-      image: "https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?w=400",
-      quantity: 1,
-      inStock: false
-    }
-  ]);
+  const { cart, updateQuantity, removeFromCart, getTotalPrice } = useCart();
 
-  const updateQuantity = (id: string, newQuantity: number) => {
-    if (newQuantity === 0) {
-      removeItem(id);
-      return;
-    }
-    setCartItems(items =>
-      items.map(item =>
-        item.id === id ? { ...item, quantity: newQuantity } : item
-      )
-    );
-  };
+  const shipping = getTotalPrice() > 50 ? 0 : 9.99;
+  const tax = getTotalPrice() * 0.08;
+  const total = getTotalPrice() + shipping + tax;
 
-  const removeItem = (id: string) => {
-    setCartItems(items => items.filter(item => item.id !== id));
-  };
-
-  const subtotal = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-  const shipping = subtotal > 50 ? 0 : 9.99;
-  const tax = subtotal * 0.08;
-  const total = subtotal + shipping + tax;
-
-  if (cartItems.length === 0) {
+  if (cart.length === 0) {
     return (
       <div className="min-h-screen bg-gray-50 py-12">
         <div className="container mx-auto px-4">
@@ -95,13 +51,13 @@ const Cart = () => {
             </Link>
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Shopping Cart</h1>
-          <p className="text-gray-600">{cartItems.length} items in your cart</p>
+          <p className="text-gray-600">{cart.length} items in your cart</p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-            {cartItems.map((item) => (
+            {cart.map((item) => (
               <Card key={item.id} className="overflow-hidden">
                 <CardContent className="p-6">
                   <div className="flex flex-col md:flex-row gap-4">
@@ -118,22 +74,7 @@ const Cart = () => {
                         <h3 className="font-semibold text-gray-900 mb-1">{item.title}</h3>
                         <div className="flex items-center space-x-2">
                           <span className="text-lg font-bold text-gray-900">${item.price}</span>
-                          {item.originalPrice && (
-                            <>
-                              <span className="text-sm text-gray-500 line-through">
-                                ${item.originalPrice}
-                              </span>
-                              <Badge variant="destructive" className="text-xs">
-                                Save ${(item.originalPrice - item.price).toFixed(2)}
-                              </Badge>
-                            </>
-                          )}
                         </div>
-                        {!item.inStock && (
-                          <Badge variant="secondary" className="mt-2">
-                            Out of Stock
-                          </Badge>
-                        )}
                       </div>
 
                       <div className="flex items-center justify-between">
@@ -142,7 +83,6 @@ const Cart = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                            disabled={!item.inStock}
                           >
                             <Minus className="h-3 w-3" />
                           </Button>
@@ -151,7 +91,6 @@ const Cart = () => {
                             variant="outline"
                             size="sm"
                             onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                            disabled={!item.inStock}
                           >
                             <Plus className="h-3 w-3" />
                           </Button>
@@ -164,7 +103,7 @@ const Cart = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeFromCart(item.id)}
                             className="text-red-600 hover:text-red-700 hover:bg-red-50"
                           >
                             <Trash2 className="h-4 w-4" />
@@ -199,7 +138,7 @@ const Cart = () => {
                 <div className="space-y-3 mb-6">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Subtotal</span>
-                    <span className="font-medium">${subtotal.toFixed(2)}</span>
+                    <span className="font-medium">${getTotalPrice().toFixed(2)}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-gray-600">Shipping</span>
@@ -223,7 +162,7 @@ const Cart = () => {
                 {shipping > 0 && (
                   <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-6">
                     <p className="text-sm text-blue-700">
-                      Add ${(50 - subtotal).toFixed(2)} more for free shipping!
+                      Add ${(50 - getTotalPrice()).toFixed(2)} more for free shipping!
                     </p>
                   </div>
                 )}
@@ -233,7 +172,6 @@ const Cart = () => {
                   <Button 
                     size="lg" 
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
-                    disabled={cartItems.some(item => !item.inStock)}
                   >
                     Proceed to Checkout
                   </Button>
