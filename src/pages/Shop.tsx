@@ -7,6 +7,10 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductCard } from "@/components/ProductCard";
 import { Badge } from "@/components/ui/badge";
+import CustomerService from "@/components/CustomerService";
+import { useCart } from "@/contexts/CartContext";
+import { useNavigate } from "react-router-dom";
+import { Star, ShoppingCart } from "lucide-react";
 
 const Shop = () => {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
@@ -17,6 +21,9 @@ const Shop = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [showInStock, setShowInStock] = useState(false);
   const [showOnSale, setShowOnSale] = useState(false);
+  
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const allProducts = [
     {
@@ -209,6 +216,79 @@ const Shop = () => {
     }
   };
 
+  const ProductListItem = ({ product }: { product: any }) => (
+    <Card className="mb-4">
+      <CardContent className="p-4">
+        <div className="flex gap-4">
+          <img
+            src={product.image}
+            alt={product.title}
+            className="w-32 h-32 object-cover rounded-lg cursor-pointer"
+            onClick={() => navigate(`/product/${product.id}`)}
+          />
+          <div className="flex-1">
+            <div className="flex justify-between items-start mb-2">
+              <h3 
+                className="font-medium text-lg cursor-pointer hover:text-blue-600"
+                onClick={() => navigate(`/product/${product.id}`)}
+              >
+                {product.title}
+              </h3>
+              <div className="flex gap-1">
+                {product.isNew && <Badge className="bg-green-500">New</Badge>}
+                {product.isSale && <Badge className="bg-red-500">Sale</Badge>}
+              </div>
+            </div>
+            
+            <div className="flex items-center mb-2">
+              <div className="flex">
+                {[...Array(5)].map((_, i) => (
+                  <Star
+                    key={i}
+                    className={`h-4 w-4 ${
+                      i < Math.floor(product.rating)
+                        ? "text-yellow-400 fill-current"
+                        : "text-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+              <span className="text-sm text-gray-500 ml-2">({product.reviews} reviews)</span>
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <span className="text-xl font-bold text-gray-900">${product.price}</span>
+                {product.originalPrice && (
+                  <span className="text-lg text-gray-500 line-through">
+                    ${product.originalPrice}
+                  </span>
+                )}
+              </div>
+              
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => navigate(`/product/${product.id}`)}
+                >
+                  View Details
+                </Button>
+                <Button 
+                  onClick={() => addToCart(product)}
+                  disabled={!product.inStock}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  <ShoppingCart className="h-4 w-4 mr-2" />
+                  Add to Cart
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
@@ -353,7 +433,7 @@ const Shop = () => {
             </div>
           </div>
 
-          {/* Products Grid */}
+          {/* Products Grid/List */}
           <div className="flex-1">
             {/* Results count */}
             <div className="flex items-center justify-between mb-6">
@@ -364,15 +444,19 @@ const Shop = () => {
             </div>
 
             {/* Products */}
-            <div className={`grid gap-6 ${
-              viewMode === 'grid' 
-                ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' 
-                : 'grid-cols-1'
-            }`}>
-              {sortedProducts.map((product) => (
-                <ProductCard key={product.id} {...product} />
-              ))}
-            </div>
+            {viewMode === 'grid' ? (
+              <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                {sortedProducts.map((product) => (
+                  <ProductCard key={product.id} {...product} />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {sortedProducts.map((product) => (
+                  <ProductListItem key={product.id} product={product} />
+                ))}
+              </div>
+            )}
 
             {sortedProducts.length === 0 && (
               <div className="text-center py-12">
@@ -404,6 +488,8 @@ const Shop = () => {
           </div>
         </div>
       </div>
+      
+      <CustomerService />
     </div>
   );
 };

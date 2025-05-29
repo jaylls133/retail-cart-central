@@ -1,11 +1,14 @@
-
 import { Link } from "react-router-dom";
 import { CheckCircle, Download, Package, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import CustomerService from "@/components/CustomerService";
+import { useToast } from "@/hooks/use-toast";
 
 const OrderSuccess = () => {
+  const { toast } = useToast();
+
   const orderDetails = {
     orderId: "ORD-2024-001234",
     orderDate: "March 15, 2024",
@@ -27,6 +30,36 @@ const OrderSuccess = () => {
       }
     ],
     total: 139.97
+  };
+
+  const handleDownloadInvoice = () => {
+    toast({
+      title: "Invoice Downloaded",
+      description: "Your invoice has been downloaded successfully.",
+    });
+    
+    // Create a sample invoice download
+    const invoiceData = `
+INVOICE
+Order ID: ${orderDetails.orderId}
+Date: ${orderDetails.orderDate}
+Total: $${orderDetails.total}
+
+Items:
+${orderDetails.items.map(item => `${item.title} - $${item.price} x ${item.quantity}`).join('\n')}
+
+Thank you for your purchase!
+    `;
+    
+    const blob = new Blob([invoiceData], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `invoice-${orderDetails.orderId}.txt`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
   };
 
   return (
@@ -147,7 +180,7 @@ const OrderSuccess = () => {
           {/* Action Buttons */}
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button variant="outline" className="w-full">
+              <Button variant="outline" className="w-full" onClick={handleDownloadInvoice}>
                 <Download className="h-4 w-4 mr-2" />
                 Download Invoice
               </Button>
@@ -178,6 +211,8 @@ const OrderSuccess = () => {
           </div>
         </div>
       </div>
+      
+      <CustomerService />
     </div>
   );
 };

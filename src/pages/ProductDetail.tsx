@@ -1,17 +1,20 @@
-
 import { useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Heart, ShoppingCart, Star, Minus, Plus, Truck, Shield, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ProductCard } from "@/components/ProductCard";
+import CustomerService from "@/components/CustomerService";
+import { useCart } from "@/contexts/CartContext";
 
 const ProductDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [quantity, setQuantity] = useState(1);
   const [selectedImage, setSelectedImage] = useState(0);
+  const { addToCart } = useCart();
+  const navigate = useNavigate();
 
   const product = {
     id: id || "1",
@@ -67,6 +70,15 @@ const ProductDetail = () => {
       isNew: true
     }
   ];
+
+  const handleAddToCart = () => {
+    addToCart(product, quantity);
+  };
+
+  const handleBuyNow = () => {
+    addToCart(product, quantity);
+    navigate('/checkout');
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -171,7 +183,7 @@ const ProductDetail = () => {
               </div>
 
               <div className="flex space-x-4">
-                <Button size="lg" className="flex-1 bg-blue-600 hover:bg-blue-700">
+                <Button size="lg" className="flex-1 bg-blue-600 hover:bg-blue-700" onClick={handleAddToCart}>
                   <ShoppingCart className="h-5 w-5 mr-2" />
                   Add to Cart
                 </Button>
@@ -180,7 +192,12 @@ const ProductDetail = () => {
                 </Button>
               </div>
 
-              <Button variant="outline" size="lg" className="w-full">
+              <Button 
+                variant="outline" 
+                size="lg" 
+                className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                onClick={handleBuyNow}
+              >
                 Buy Now
               </Button>
             </div>
@@ -265,6 +282,8 @@ const ProductDetail = () => {
           </div>
         </div>
       </div>
+      
+      <CustomerService />
     </div>
   );
 };

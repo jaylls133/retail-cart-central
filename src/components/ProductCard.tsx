@@ -1,9 +1,9 @@
 
+import { Link } from "react-router-dom";
 import { Heart, ShoppingCart, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "react-router-dom";
+import { useCart } from "@/contexts/CartContext";
 
 interface ProductCardProps {
   id: string;
@@ -13,7 +13,7 @@ interface ProductCardProps {
   image: string;
   rating: number;
   reviews: number;
-  inStock: boolean;
+  inStock?: boolean;
   isNew?: boolean;
   isSale?: boolean;
 }
@@ -26,65 +26,52 @@ export const ProductCard = ({
   image,
   rating,
   reviews,
-  inStock,
+  inStock = true,
   isNew,
   isSale
 }: ProductCardProps) => {
+  const { addToCart } = useCart();
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addToCart({ id, title, price, image });
+  };
+
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 border-gray-200 hover:border-blue-200">
-      <CardContent className="p-4">
-        <div className="relative overflow-hidden rounded-lg bg-gray-100 aspect-square mb-4">
-          <Link to={`/product/${id}`}>
-            <img
-              src={image}
-              alt={title}
-              className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            />
-          </Link>
-          
-          {/* Badges */}
+    <Link to={`/product/${id}`} className="group">
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-shadow duration-200">
+        <div className="relative aspect-square overflow-hidden">
+          <img
+            src={image}
+            alt={title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+          />
           <div className="absolute top-2 left-2 flex flex-col gap-1">
             {isNew && <Badge className="bg-green-500">New</Badge>}
             {isSale && <Badge className="bg-red-500">Sale</Badge>}
-            {!inStock && <Badge variant="secondary">Out of Stock</Badge>}
           </div>
-
-          {/* Wishlist button */}
           <Button
+            variant="ghost"
             size="sm"
-            variant="secondary"
-            className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200 h-8 w-8 p-0"
+            className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/80 hover:bg-white"
+            onClick={(e) => e.preventDefault()}
           >
             <Heart className="h-4 w-4" />
           </Button>
-
-          {/* Quick add to cart */}
-          <div className="absolute bottom-2 left-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-            <Button 
-              size="sm" 
-              className="w-full bg-blue-600 hover:bg-blue-700"
-              disabled={!inStock}
-            >
-              <ShoppingCart className="h-4 w-4 mr-2" />
-              Add to Cart
-            </Button>
-          </div>
         </div>
-
-        <div className="space-y-2">
-          <Link to={`/product/${id}`}>
-            <h3 className="font-medium text-gray-900 hover:text-blue-600 transition-colors line-clamp-2">
-              {title}
-            </h3>
-          </Link>
-
-          {/* Rating */}
-          <div className="flex items-center space-x-1">
+        
+        <div className="p-4">
+          <h3 className="font-medium text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
+            {title}
+          </h3>
+          
+          <div className="flex items-center mb-2">
             <div className="flex">
               {[...Array(5)].map((_, i) => (
                 <Star
                   key={i}
-                  className={`h-3 w-3 ${
+                  className={`h-4 w-4 ${
                     i < Math.floor(rating)
                       ? "text-yellow-400 fill-current"
                       : "text-gray-300"
@@ -92,20 +79,36 @@ export const ProductCard = ({
                 />
               ))}
             </div>
-            <span className="text-xs text-gray-500">({reviews})</span>
+            <span className="text-sm text-gray-500 ml-1">({reviews})</span>
           </div>
-
-          {/* Price */}
-          <div className="flex items-center space-x-2">
-            <span className="text-lg font-bold text-gray-900">${price}</span>
-            {originalPrice && (
-              <span className="text-sm text-gray-500 line-through">
-                ${originalPrice}
-              </span>
+          
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <span className="text-lg font-bold text-gray-900">${price}</span>
+              {originalPrice && (
+                <span className="text-sm text-gray-500 line-through">
+                  ${originalPrice}
+                </span>
+              )}
+            </div>
+            {!inStock && (
+              <Badge variant="destructive" className="text-xs">
+                Out of Stock
+              </Badge>
             )}
           </div>
+          
+          <Button 
+            onClick={handleAddToCart}
+            disabled={!inStock}
+            className="w-full bg-blue-600 hover:bg-blue-700"
+            size="sm"
+          >
+            <ShoppingCart className="h-4 w-4 mr-2" />
+            Add to Cart
+          </Button>
         </div>
-      </CardContent>
-    </Card>
+      </div>
+    </Link>
   );
 };
