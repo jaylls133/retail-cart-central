@@ -1,10 +1,9 @@
-
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Link } from "react-router-dom";
 
-export const Footer = () => {
+const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
       {/* Newsletter section */}
@@ -110,3 +109,5 @@ export const Footer = () => {
     </footer>
   );
 };
+
+export default Footer;

@@ -1,4 +1,3 @@
-
 import { ShoppingCart, Search, Menu, User, Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -6,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 
-export const Navbar = () => {
+const Navbar = () => {
   const [cartItems] = useState(3);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
@@ -112,3 +111,5 @@ export const Navbar = () => {
     </nav>
   );
 };
+
+export default Navbar;
